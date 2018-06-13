@@ -27,7 +27,9 @@ List.prototype.updateData = function(){
 }
 
 List.prototype.clearList = function(){
-
+  for( item in this.json_data ){
+    this.removeItem(item) ;
+  }
 };
 
 List.prototype.removeItem = function ( itemId ) {
@@ -43,59 +45,48 @@ List.prototype.addItem = function ( itemName ) {
 
 };
 
-List.prototype.fetchItem = function () {
-
-};
-
 List.prototype.printList = function () {
+
+  let strList ;
+
   for( item in this.json_data ){
-    console.log( item + ' : ' + this.json_data[item] + '\n') ;
+    strList += (item + ' : ' + this.json_data[item] + '\n') ;
+    //console.log( item + ' : ' + this.json_data[item] + '\n') ;
   }
+  return strList ;
 };
 
 //TEST
 var listCommi = new List() ;
-listCommi.printList() ;
 
-console.log('\n');
-
-listCommi.addItem('yeah') ;
-listCommi.printList() ;
-
-console.log(listCommi.json_data);
-console.log('\n');
-
-//listCommi.removeItem() ;
-//listCommi.printList() ;
-
-
-
-
-
-// myObj = { "name":"John", "age":31, "city":"New York" };
-// myJSON = JSON.stringify(myObj);
-// localStorage.setItem("testJSON", myJSON);
-//
-//
-//
-// text = localStorage.getItem("testJSON");
-// obj = JSON.parse(text);
-
-// Print URL for accessing server
-
-
-
+var showAllCommand = "/printList \n /?addItem=nom de l item \n /?removeItem=numero de l item \n /clearList" ;
 
 //Load HTTP module
 var http = require("http");
+var url = require('url');
 
 //Create HTTP server and listen on port 8000 for requests
 http.createServer(function (request, response) {
 
    // Set the response HTTP header with HTTP status and Content type
    response.writeHead(200, {'Content-Type': 'text/plain'});
-   // Send the response body "Hello World"
-   response.end('Hello World\n');
+
+   var query = url.parse(request.url, true).query;
+   var addItem = query.addItem ;
+   var removeItem = query.removeItem ;
+
+   if( request.url == '/printList'){
+     response.end(listCommi.printList());
+   }else if( addItem ){
+    listCommi.addItem(addItem) ;
+    response.end(listCommi.printList());
+  }else if (removeItem) {
+    listCommi.removeItem(removeItem);
+    response.end(listCommi.printList());
+  }
+   else{
+     response.end(showAllCommand);
+   }
 
 }).listen(8000);
 
